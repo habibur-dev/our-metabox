@@ -1,0 +1,39 @@
+.omb-fields-wrapper{
+
+}
+
+.omb-single-fields{
+    margin: 15px 0;
+}
+
+.omb-label-wrapper{
+    width: 15%;
+    float: left;
+}
+
+.omb-input-wrapper{
+    width: 85%;
+    float: left;
+}
+
+.omb-input-wrapper.checkbox{
+
+}
+
+.omb-checkbox-wrapper{
+    float: left;
+    margin-right: 15px;
+}
+
+.omb-input-wrapper.radiobox{
+
+}
+
+.omb-radio-wrapper{
+    float: left;
+    margin-right: 15px;
+}
+
+.clear-both{
+    clear: both;
+}

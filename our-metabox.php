@@ -17,6 +17,12 @@
         add_action('plugins_loaded', array($this, 'omb_load_textdomain'));
         add_action('admin_menu', array($this, 'omb_add_metabox'));
         add_action('save_post', array($this, 'omb_save_metabox'));
+
+        add_action('admin_enqueue_scripts', array($this, 'omb_admin_assets'));
+    }
+
+    public function omb_admin_assets(){
+        wp_enqueue_style('omb-admin-style', plugin_dir_url(__FILE__)."assets/admin/css/style.css", null, time());
     }
 
     public function omb_add_metabox(){
@@ -50,55 +56,90 @@
 
         wp_nonce_field( 'omb_location', 'omb_location_field' );
         $metabox = <<<EOD
-<p>
-<label for="omb_location">{$label}</label>
-<input type="text" name="omb_location" id="omb_location" value="{$location}">
-<br>
-<label for="omb_country">{$label2}</label>
-<input type="text" name="omb_country" id="omb_country" value="{$country}">
-</p>
+<div class="omb-fields-wrapper">
+    <div class="omb-single-fields">
+        <div class="omb-label-wrapper">
+            <label for="omb_location">{$label}</label>
+        </div>
+        <div class="omb-input-wrapper">
+            <input type="text" name="omb_location" id="omb_location" value="{$location}">
+        </div>
+        <div class="clear-both"></div>
+    </div>
 
-<p>
-<label for="omb_is_favorite">{$label3}</label>
-<input type="checkbox" name="omb_is_favorite" id="omb_is_favorite" value="1" {$checked}>
-</p>
+    <div class="omb-single-fields">
+        <div class="omb-label-wrapper">
+            <label for="omb_country">{$label2}</label>
+        </div>
+        <div class="omb-input-wrapper">
+            <input type="text" name="omb_country" id="omb_country" value="{$country}">
+        </div>
+        <div class="clear-both"></div>
+    </div>
+    
 
-<p>
-<label>{$label4}: </label>
+    <div class="omb-single-fields">
+        <div class="omb-label-wrapper">
+            <label for="omb-is-favorite">{$label3}</label>
+        </div>
+        <div class="omb-input-wrapper">
+            <input type="checkbox" name="omb_is_favorite" id="omb_is_favorite" value="1" {$checked}>
+        </div>
+        <div class="clear-both"></div>
+    </div>
 
+    <div class="omb-single-fields">
+        <div class="omb-label-wrapper">
+            <label>{$label4}: </label>
+        </div>
+
+        <div class="omb-input-wrapper checkbox">
 EOD;
     
         foreach($colors as $color){
             $_color = ucwords($color);
             $checked = in_array($color, $saved_colors) ? 'checked' : '';
             $metabox .= <<<EOD
-<label for="omb_clr_{$color}">{$_color}</label>
-<input type="checkbox" name="omb_clrs[]" id="omb_clr_{$color}" value="{$color}" {$checked}>
+<div class="omb-checkbox-wrapper">
+    <input type="checkbox" name="omb_clrs[]" id="omb_clr_{$color}" value="{$color}" {$checked}>
+    <label for="omb_clr_{$color}">{$_color}</label>
+</div>
 EOD;
-        }
+    }
 
-        $metabox .= "</p>";
-
+        $metabox .= "</div>";
+        $metabox .= '<div class="clear-both"></div>';
+        $metabox .= "</div>";
         $metabox .= <<<EOD
-<p>
-<label>{$label5}: </label>
+<div class="omb-single-fields">
+    <div class="omb-label-wrapper">
+        <label>{$label5}: </label>
+    </div>
+    <div class="omb-input-wrapper radiobox">
 EOD;
 
         foreach($colors as $color){
             $_color = ucwords($color);
             $checked = ($color == $saved_rcolors) ? 'checked="checked"' : '';
             $metabox .= <<<EOD
-<label for="omb_rclr_{$color}">{$_color}</label>
-<input type="radio" name="omb_rclrs" id="omb_rclr_{$color}" value="{$color}" {$checked}>
+<div class="omb-radio-wrapper">
+    <input type="radio" name="omb_rclrs" id="omb_rclr_{$color}" value="{$color}" {$checked}>
+    <label for="omb_rclr_{$color}">{$_color}</label>
+</div>
 EOD;
     
-        }
+    }
 
-        $metabox .= "</p>";
+        $metabox .= "</div>";
+        $metabox .= '<div class="clear-both"></div>';
+        $metabox .= "</div>";
         $metabox .= <<<EOD
-<p>
-<label for="omb_seasons">{$label6}: </label>
-<select name="omb_seasons" id="omb_seasons">
+<div class="omb-single-fields">
+    <div class="omb-label-wrapper">
+        <label for="omb_seasons">{$label6}: </label>
+    </div>
+    <div class="omb-input-wrapper dropdown">
+        <select name="omb_seasons" id="omb_seasons">
 EOD;    
 
         foreach($seasons as $season){
@@ -107,9 +148,13 @@ EOD;
             $metabox .= <<<EOD
 <option value="{$season}" {$selected}>{$_season}</option>
 EOD;
-        }
+    }
+
         $metabox .= "</select>";
-        $metabox .= "</p>";
+        $metabox .= "</div>";
+        $metabox .= '<div class="clear-both"></div>';
+        $metabox .= "</div>";
+        $metabox .= "</div>";
         echo $metabox;
     }
 
