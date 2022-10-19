@@ -16,23 +16,33 @@
     public function __construct(){
         add_action('plugins_loaded', array($this, 'omb_load_textdomain'));
         add_action('admin_menu', array($this, 'omb_add_metabox'));
-        add_action('save_post', array($this, 'omb_save_location'));
+        add_action('save_post', array($this, 'omb_save_metabox'));
     }
 
     public function omb_add_metabox(){
         add_meta_box(
             'omb_post_location', 
             __('Location Info', 'our-metabox'), 
-            array($this, 'omb_display_post_location'),
+            array($this, 'omb_display_metabox'),
             array('post', 'page'),
         );
     }
 
-    public function omb_display_post_location($post){
+    public function omb_display_metabox($post){
         $location = get_post_meta($post->ID, 'omb_location', true);
         $country = get_post_meta($post->ID, 'omb_country', true);
+        $is_favorite = get_post_meta($post->ID, 'omb_is_favorite', true);
+        $checked = $is_favorite == 1? 'checked' : '';
+
+        $saved_colors = get_post_meta($post->ID, 'omb_clrs', true);
+
         $label = __('Location', 'our-metabox');
         $label2 = __('Country', 'our-metabox');
+        $label3 = __('Is Favorite', 'our-metabox');
+        $label4 = __('Colors', 'our-metabox');
+
+        $colors = array('red', 'green', 'blue', 'yellow', 'magenta', 'pink', 'black', 'white');
+
         wp_nonce_field( 'omb_location', 'omb_location_field' );
         $metabox = <<<EOD
 <p>
@@ -42,8 +52,27 @@
 <label for="omb_country">{$label2}</label>
 <input type="text" name="omb_country" id="omb_country" value="{$country}">
 </p>
-EOD;
 
+<p>
+<label for="omb_is_favorite">{$label3}</label>
+<input type="checkbox" name="omb_is_favorite" id="omb_is_favorite" value="1" {$checked}>
+</p>
+
+<p>
+<label>{$label4}: </label>
+
+EOD;
+    
+    foreach($colors as $color){
+        $_color = ucwords($color);
+        $checked = in_array($color, $saved_colors) ? 'checked' : '';
+        $metabox .= <<<EOD
+<label for="omb_clr_{$color}">{$_color}</label>
+<input type="checkbox" name="omb_clrs[]" id="omb_clr_{$color}" value="{$color}" {$checked}>
+EOD;
+    }
+
+    $metabox .= "</p>";
     echo $metabox;
     }
 
@@ -77,12 +106,14 @@ EOD;
         return true;
     }
 
-    public function omb_save_location($post_id){
+    public function omb_save_metabox($post_id){
         if(!$this->is_secured('omb_location_field', 'omb_location', $post_id)){
             return $post_id;
         }
         $location = isset($_POST['omb_location']) ? $_POST['omb_location'] : '';
         $country = isset($_POST['omb_country']) ? $_POST['omb_country'] : '';
+        $is_favorite = isset($_POST['omb_is_favorite']) ? $_POST['omb_is_favorite'] : '';
+        $colors = isset($_POST['omb_clrs']) ? $_POST['omb_clrs'] : array();
 
         if($location == '' && $country == ''){
             return $post_id;
@@ -93,6 +124,8 @@ EOD;
 
         update_post_meta($post_id, 'omb_location', $location);
         update_post_meta($post_id, 'omb_country', $country);
+        update_post_meta($post_id, 'omb_is_favorite', $is_favorite);
+        update_post_meta($post_id, 'omb_clrs', $colors);
     }
     
 
