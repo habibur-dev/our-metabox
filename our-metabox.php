@@ -35,13 +35,18 @@
         $checked = $is_favorite == 1? 'checked' : '';
 
         $saved_colors = get_post_meta($post->ID, 'omb_clrs', true);
+        $saved_rcolors = get_post_meta($post->ID, 'omb_rclrs', true);
+        $saved_seasons = get_post_meta($post->ID, 'omb_seasons', true);
 
         $label = __('Location', 'our-metabox');
         $label2 = __('Country', 'our-metabox');
         $label3 = __('Is Favorite', 'our-metabox');
         $label4 = __('Colors', 'our-metabox');
+        $label5 = __('Radio Colors', 'our-metabox');
+        $label6 = __('Select Season', 'our-metabox');
 
         $colors = array('red', 'green', 'blue', 'yellow', 'magenta', 'pink', 'black', 'white');
+        $seasons = array('summer', 'rainy', 'autumn', 'late autumn', 'winter', 'spring');
 
         wp_nonce_field( 'omb_location', 'omb_location_field' );
         $metabox = <<<EOD
@@ -63,17 +68,49 @@
 
 EOD;
     
-    foreach($colors as $color){
-        $_color = ucwords($color);
-        $checked = in_array($color, $saved_colors) ? 'checked' : '';
-        $metabox .= <<<EOD
+        foreach($colors as $color){
+            $_color = ucwords($color);
+            $checked = in_array($color, $saved_colors) ? 'checked' : '';
+            $metabox .= <<<EOD
 <label for="omb_clr_{$color}">{$_color}</label>
 <input type="checkbox" name="omb_clrs[]" id="omb_clr_{$color}" value="{$color}" {$checked}>
 EOD;
-    }
+        }
 
-    $metabox .= "</p>";
-    echo $metabox;
+        $metabox .= "</p>";
+
+        $metabox .= <<<EOD
+<p>
+<label>{$label5}: </label>
+EOD;
+
+        foreach($colors as $color){
+            $_color = ucwords($color);
+            $checked = ($color == $saved_rcolors) ? 'checked="checked"' : '';
+            $metabox .= <<<EOD
+<label for="omb_rclr_{$color}">{$_color}</label>
+<input type="radio" name="omb_rclrs" id="omb_rclr_{$color}" value="{$color}" {$checked}>
+EOD;
+    
+        }
+
+        $metabox .= "</p>";
+        $metabox .= <<<EOD
+<p>
+<label for="omb_seasons">{$label6}: </label>
+<select name="omb_seasons" id="omb_seasons">
+EOD;    
+
+        foreach($seasons as $season){
+            $_season = ucwords($season);
+            $selected = ($season == $saved_seasons) ? 'selected' : '';
+            $metabox .= <<<EOD
+<option value="{$season}" {$selected}>{$_season}</option>
+EOD;
+        }
+        $metabox .= "</select>";
+        $metabox .= "</p>";
+        echo $metabox;
     }
 
     public function omb_load_textdomain(){
@@ -114,6 +151,8 @@ EOD;
         $country = isset($_POST['omb_country']) ? $_POST['omb_country'] : '';
         $is_favorite = isset($_POST['omb_is_favorite']) ? $_POST['omb_is_favorite'] : '';
         $colors = isset($_POST['omb_clrs']) ? $_POST['omb_clrs'] : array();
+        $radio_colors = isset($_POST['omb_rclrs']) ? $_POST['omb_rclrs'] : '';
+        $omb_seasons = isset($_POST['omb_seasons']) ? $_POST['omb_seasons'] : '';
 
         if($location == '' && $country == ''){
             return $post_id;
@@ -126,6 +165,8 @@ EOD;
         update_post_meta($post_id, 'omb_country', $country);
         update_post_meta($post_id, 'omb_is_favorite', $is_favorite);
         update_post_meta($post_id, 'omb_clrs', $colors);
+        update_post_meta($post_id, 'omb_rclrs', $radio_colors);
+        update_post_meta($post_id, 'omb_seasons', $omb_seasons);
     }
     
 
