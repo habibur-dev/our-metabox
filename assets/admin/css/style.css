@@ -11,6 +11,12 @@
     float: left;
 }
 
+.omb-label-wrapper label {
+    font-weight: bold;
+    font-size: 14px;
+    font-family: sans-serif;
+}
+
 .omb-input-wrapper{
     width: 85%;
     float: left;
@@ -32,6 +38,10 @@
 .omb-radio-wrapper{
     float: left;
     margin-right: 15px;
+}
+
+#omb_seasons {
+    width: 196px;
 }
 
 .clear-both{

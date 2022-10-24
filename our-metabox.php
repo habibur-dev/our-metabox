@@ -23,6 +23,8 @@
 
     public function omb_admin_assets(){
         wp_enqueue_style('omb-admin-style', plugin_dir_url(__FILE__)."assets/admin/css/style.css", null, time());
+        wp_enqueue_style('jqueryui-style', "//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css", null, time());
+        wp_enqueue_script('omb-admin-script', plugin_dir_url(__FILE__)."assets/admin/js/main.js", array('jquery', 'jquery-ui-datepicker'), time(), true);
     }
 
     public function omb_add_metabox(){
@@ -43,6 +45,7 @@
         $saved_colors = get_post_meta($post->ID, 'omb_clrs', true);
         $saved_rcolors = get_post_meta($post->ID, 'omb_rclrs', true);
         $saved_seasons = get_post_meta($post->ID, 'omb_seasons', true);
+        $saved_date = get_post_meta($post->ID, 'omb_dp', true);
 
         $label = __('Location', 'our-metabox');
         $label2 = __('Country', 'our-metabox');
@@ -50,6 +53,7 @@
         $label4 = __('Colors', 'our-metabox');
         $label5 = __('Radio Colors', 'our-metabox');
         $label6 = __('Select Season', 'our-metabox');
+        $label7 = __('Date Picker', 'our-metabox');
 
         $colors = array('red', 'green', 'blue', 'yellow', 'magenta', 'pink', 'black', 'white');
         $seasons = array('summer', 'rainy', 'autumn', 'late autumn', 'winter', 'spring');
@@ -95,7 +99,7 @@
 
         <div class="omb-input-wrapper checkbox">
 EOD;
-    
+        $saved_colors = is_array($saved_colors) ? $saved_colors : array();
         foreach($colors as $color){
             $_color = ucwords($color);
             $checked = in_array($color, $saved_colors) ? 'checked' : '';
@@ -148,12 +152,24 @@ EOD;
             $metabox .= <<<EOD
 <option value="{$season}" {$selected}>{$_season}</option>
 EOD;
-    }
+        }
 
         $metabox .= "</select>";
         $metabox .= "</div>";
         $metabox .= '<div class="clear-both"></div>';
         $metabox .= "</div>";
+        $metabox .= <<<EOD
+<div class="omb-single-fields">
+    <div class="omb-label-wrapper">
+        <label for="omb_dp">{$label7}</label>
+    </div>
+    <div class="omb-input-wrapper">
+        <input type="text" name="omb_dp" class="omb_dp" id="omb_dp" value="{$saved_date}">
+    </div>
+    <div class="clear-both"></div>
+</div>
+       
+EOD;
         $metabox .= "</div>";
         echo $metabox;
     }
@@ -198,6 +214,7 @@ EOD;
         $colors = isset($_POST['omb_clrs']) ? $_POST['omb_clrs'] : array();
         $radio_colors = isset($_POST['omb_rclrs']) ? $_POST['omb_rclrs'] : '';
         $omb_seasons = isset($_POST['omb_seasons']) ? $_POST['omb_seasons'] : '';
+        $omb_date = isset($_POST['omb_dp']) ? $_POST['omb_dp'] : '';
 
         if($location == '' && $country == ''){
             return $post_id;
@@ -212,6 +229,7 @@ EOD;
         update_post_meta($post_id, 'omb_clrs', $colors);
         update_post_meta($post_id, 'omb_rclrs', $radio_colors);
         update_post_meta($post_id, 'omb_seasons', $omb_seasons);
+        update_post_meta($post_id, 'omb_dp', $omb_date);
     }
     
 
