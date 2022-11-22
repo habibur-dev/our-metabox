@@ -17,6 +17,7 @@
         add_action('plugins_loaded', array($this, 'omb_load_textdomain'));
         add_action('admin_menu', array($this, 'omb_add_metabox'));
         add_action('save_post', array($this, 'omb_save_metabox'));
+        add_action('save_post', array($this, 'omb_save_image'));
 
         add_action('admin_enqueue_scripts', array($this, 'omb_admin_assets'));
     }
@@ -33,6 +34,13 @@
             __('Location Info', 'our-metabox'), 
             array($this, 'omb_display_metabox'),
             array('post', 'page'),
+        );
+
+        add_meta_box(
+            'omb_post_image', 
+            __('Metabox Image', 'our-metabox'), 
+            array($this, 'omb_display_image'),
+            array('post'),
         );
     }
 
@@ -144,12 +152,14 @@ EOD;
     </div>
     <div class="omb-input-wrapper dropdown">
         <select name="omb_seasons" id="omb_seasons">
+        <option value="0">Select a season</option>
 EOD;    
 
         foreach($seasons as $season){
             $_season = ucwords($season);
             $selected = ($season == $saved_seasons) ? 'selected' : '';
             $metabox .= <<<EOD
+
 <option value="{$season}" {$selected}>{$_season}</option>
 EOD;
         }
@@ -172,6 +182,35 @@ EOD;
 EOD;
         $metabox .= "</div>";
         echo $metabox;
+    }
+
+    // Image meta box
+    public function omb_display_image($post){
+        wp_nonce_field( 'omb_image', 'omb_image_field' );
+
+        $image_id = esc_attr(get_post_meta($post->ID, 'omb_image_id', true));
+        $image_url = esc_attr(get_post_meta($post->ID, 'omb_image_url', true));
+
+        $metabox = <<<EOD
+        <div class="omb-fields-wrapper">
+            <div class="omb-single-fields">
+                <div class="omb-label-wrapper">
+                    <label for="omb_image">Image</label>
+                </div>
+
+                <div class="omb-input-wrapper">
+                    <button class="button" id="omb_image">Upload Image</button>
+                    <input type="hidden" name="omb_image_id" id="omb_image_id" value="{$image_id}">
+                    <input type="hidden" name="omb_image_url" id="omb_image_url" value="{$image_url}">
+                    <div id="omb_image_container"></div>
+                </div>
+                <div class="clear-both"></div>
+            </div>
+        </div>
+EOD;
+
+        echo $metabox;
+
     }
 
     public function omb_load_textdomain(){
@@ -230,6 +269,19 @@ EOD;
         update_post_meta($post_id, 'omb_rclrs', $radio_colors);
         update_post_meta($post_id, 'omb_seasons', $omb_seasons);
         update_post_meta($post_id, 'omb_dp', $omb_date);
+    }
+
+    public function omb_save_image($post_id){
+        if(!$this->is_secured('omb_image_field', 'omb_image', $post_id)){
+            return $post_id;
+        }
+
+        $image_id = isset($_POST['omb_image_id']) ? $_POST['omb_image_id'] : '';
+        $image_url = isset($_POST['omb_image_url']) ? $_POST['omb_image_url'] : '';
+
+        update_post_meta($post_id, 'omb_image_id', $image_id);
+        update_post_meta($post_id, 'omb_image_url', $image_url);
+
     }
     
 

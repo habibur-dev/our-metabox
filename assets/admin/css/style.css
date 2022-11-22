@@ -20,6 +20,7 @@
 .omb-input-wrapper{
     width: 85%;
     float: left;
+    overflow: hidden;
 }
 
 .omb-input-wrapper.checkbox{
@@ -46,4 +47,8 @@
 
 .clear-both{
     clear: both;
+}
+
+#omb_image_container img{
+    margin-top: 15px;
 }
